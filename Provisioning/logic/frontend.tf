@@ -13,8 +13,8 @@ resource "azurerm_public_ip" "front_public_ip" {
 
 resource "azurerm_network_interface" "front_nic" {
   name                = "${local.naming_convention}-front-nic"
-  location            = azurerm_resource_group.resource_groupLB.location
-  resource_group_name = azurerm_resource_group.resource_groupLB.name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
 
   ip_configuration {
     name                          = "public"
@@ -26,11 +26,11 @@ resource "azurerm_network_interface" "front_nic" {
 
 resource "azurerm_linux_virtual_machine" "front_vm" {
   name                = "${local.naming_convention}-front-vm"
-  resource_group_name = azurerm_resource_group.resource_groupLB.name
-  location            = azurerm_resource_group.resource_groupLB.location
-  size                = "Standard_F2"
+  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = azurerm_resource_group.resource_group.location
   admin_username      = "distribuidos"
   admin_password         = "AlejandraJhoanAndres212021"
+  size = "Standard_F1"
   network_interface_ids = [
     azurerm_network_interface.front_nic.id,
   ]
@@ -51,15 +51,15 @@ resource "azurerm_linux_virtual_machine" "front_vm" {
 resource "azurerm_public_ip" "public_ip_lb" {
   name                = "${local.naming_convention}-lb-public-ip"
   domain_name_label   = "lbipdavidfiat"
-  resource_group_name = azurerm_resource_group.resource_groupLB.name
-  location            = azurerm_resource_group.resource_groupLB.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = azurerm_resource_group.resource_group.location
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_lb" "load_balancer" {
   name                = "${local.naming_convention}-lb"
-  location            = azurerm_resource_group.resource_groupLB.location
-  resource_group_name = azurerm_resource_group.resource_groupLB.name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
 
   frontend_ip_configuration {
     name                 = "PublicIPAddress"
