@@ -28,6 +28,7 @@ resource "azurerm_lb_backend_address_pool" "azurerm_load_balancer_address_pool" 
   loadbalancer_id     = azurerm_lb.load_balancer_back.id
 }
 
+/*
 //VPN
 resource "azurerm_virtual_wan" "wan" {
   name                = "${local.naming_convention}-wan"
@@ -42,6 +43,31 @@ resource "azurerm_virtual_hub" "hub" {
   virtual_wan_id      = azurerm_virtual_wan.wan.id
   address_prefix      = "10.0.2.0/24"
 }
+*/
+
+
+resource "azurerm_public_ip" "back_public_ip" {
+  name                = "${local.naming_convention}-back-public-ip"
+  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = azurerm_resource_group.resource_group.location
+  allocation_method   = "Static"
+}
+
+resource "azurerm_network_interface" "back_nic" {
+  name                = "${local.naming_convention}-back-nic"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+
+  ip_configuration {
+    name                          = "public"
+    subnet_id                     = azurerm_subnet.subnet_backend.id
+    private_ip_address_allocation = "Dynamic" 
+    public_ip_address_id          = azurerm_public_ip.back_public_ip.id
+  }
+}
+
+
+/*
 
 resource "azurerm_vpn_gateway" "vpn_gateway" {
   name                = "${local.naming_convention}-vpn"
@@ -49,6 +75,8 @@ resource "azurerm_vpn_gateway" "vpn_gateway" {
   resource_group_name = azurerm_resource_group.resource_group.name
   virtual_hub_id      = azurerm_virtual_hub.hub.id
 }
+
+*/
 
 //Scale Set
 resource "azurerm_linux_virtual_machine_scale_set" "azurerm_linux_virtual_machine_scale_set" {
@@ -103,4 +131,9 @@ resource "azurerm_network_security_group" "azurer_network_security_group_backend
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+}
+
+resource "azurerm_network_interface_security_group_association" "nsg_back" {
+  network_interface_id      = azurerm_network_interface.back_nic.id
+  network_security_group_id = azurerm_network_security_group.azurer_network_security_group_backend.id
 }

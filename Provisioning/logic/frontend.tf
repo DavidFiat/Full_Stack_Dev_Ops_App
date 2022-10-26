@@ -50,7 +50,7 @@ resource "azurerm_linux_virtual_machine" "front_vm" {
 
 resource "azurerm_public_ip" "public_ip_lb" {
   name                = "${local.naming_convention}-lb-public-ip"
-  domain_name_label   = "lbipdavidfiat"
+  domain_name_label   = "lbipfiatrestrepodavid"
   resource_group_name = azurerm_resource_group.resource_group.name
   location            = azurerm_resource_group.resource_group.location
   allocation_method   = "Dynamic"
@@ -85,31 +85,34 @@ resource "azurerm_network_security_group" "security-group" {
 
   security_rule {
     name                       = "ssh"
-    priority                   = 100
+    priority                   = 1000
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "*"
-    source_port_range          = "22"
+    source_port_range          = "*"
     destination_port_range     = "22"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+   security_rule {
+    name                       = "http"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3000"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+
 }
 
-resource "azurerm_network_security_group" "security-group1" {
-  name                = "${local.naming_convention}-sg1"
-  location            = azurerm_resource_group.resource_group.location
-  resource_group_name = azurerm_resource_group.resource_group.name
 
-  security_rule {
-    name                       = "ssh"
-    priority                   = 100
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_port_range          = "22"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+
+resource "azurerm_network_interface_security_group_association" "nsg_a" {
+  network_interface_id      = azurerm_network_interface.front_nic.id
+  network_security_group_id = azurerm_network_security_group.security-group.id
 }
